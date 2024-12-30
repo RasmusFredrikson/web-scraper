@@ -1,10 +1,13 @@
 import { Page } from "playwright";
 
+export const glassblowingBookingUrl =
+  "https://app.10to8.com/book/cjbrzsjlhgpeyvshim/#";
+
 export async function navigateToGlassblowingAvailability(
   page: Page,
   numberOfPeople: number = 2
 ) {
-  await page.goto("https://app.10to8.com/book/cjbrzsjlhgpeyvshim/#");
+  await page.goto(glassblowingBookingUrl);
 
   await glassblowingBookingFrame(page)
     .getByRole("button")
