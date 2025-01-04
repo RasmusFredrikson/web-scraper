@@ -2,7 +2,7 @@
   "name": "web-scraper",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/src/functions/*.js",
+  "main": "dist/src/functions/**/*.js",
   "scripts": {
     "build": "tsc",
     "dev": "cross-env NODE_ENV=development npm run start",

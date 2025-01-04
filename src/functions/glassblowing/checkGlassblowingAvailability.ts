@@ -2,12 +2,14 @@ import "dotenv/config";
 
 import { app, InvocationContext, Timer } from "@azure/functions";
 import { chromium } from "playwright";
-import { sendEmail } from "../email/sendEmail";
+import { sendEmail } from "../../email/sendEmail";
 import {
   glassblowingBookingFrame,
   glassblowingBookingUrl,
   navigateToGlassblowingAvailability,
-} from "../helpers/glassblowingHelper";
+} from "../../helpers/glassblowingHelper";
+
+const isDev = process.env.NODE_ENV === "development";
 
 export async function checkGlassblowingAvailability(
   timer: Timer,
@@ -15,7 +17,7 @@ export async function checkGlassblowingAvailability(
 ): Promise<void> {
   context.log("Timer trigger function executed at: ", new Date().toISOString());
 
-  const browser = await chromium.launch({ headless: false });
+  const browser = await chromium.launch({ headless: !isDev });
   const page = await browser.newPage();
 
   try {
@@ -48,7 +50,6 @@ export async function checkGlassblowingAvailability(
   }
 }
 
-const isDev = process.env.NODE_ENV === "development";
 const schedule = isDev ? "*/10 * * * * *" : "0 */10 * * * *"; // 10 seconds in dev, 10 mins in prod
 
 app.timer("checkGlassblowingAvailability", {
