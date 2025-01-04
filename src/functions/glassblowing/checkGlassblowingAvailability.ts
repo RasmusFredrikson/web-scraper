@@ -1,12 +1,10 @@
 import "dotenv/config";
 
 import { app, InvocationContext, Timer } from "@azure/functions";
-import { chromium } from "playwright";
 import { sendEmail } from "../../email/sendEmail";
 import {
-  glassblowingBookingFrame,
+  fetchScheduleDetails,
   glassblowingBookingUrl,
-  navigateToGlassblowingAvailability,
 } from "../../helpers/glassblowingHelper";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -17,36 +15,32 @@ export async function checkGlassblowingAvailability(
 ): Promise<void> {
   context.log("Timer trigger function executed at: ", new Date().toISOString());
 
-  const browser = await chromium.launch({ headless: !isDev });
-  const page = await browser.newPage();
+  const data = await fetchScheduleDetails();
+
+  context.log("Hej: ", data);
+
+  const dataExist =
+    Object.keys(data?.nextAvailableDay ?? {}).length !== 0 ||
+    data?.day.length !== 0 ||
+    data?.week.length !== 0 ||
+    data?.month.length !== 0 ||
+    data?.quarter.length !== 0;
+
+  if (!dataExist) {
+    context.log("No slots available :(");
+    return;
+  }
+
+  context.log("Slots are available");
 
   try {
-    await navigateToGlassblowingAvailability(page);
-
-    const slotsNotAvailable = await glassblowingBookingFrame(page)
-      .getByRole("listitem")
-      .getByText("No available slots")
-      .count();
-
-    if (slotsNotAvailable < 7) {
-      context.log("Slots are available");
-
-      try {
-        await sendEmail(
-          "Slots Available for Glassblowing",
-          `There are now slots available for glassblowing. Check the booking page: ${glassblowingBookingUrl}!`
-        );
-        context.log("Email sent successfully.");
-      } catch (error) {
-        context.error("Failed to send email: ", error);
-      }
-    } else {
-      context.log("No slots available :(");
-    }
+    await sendEmail(
+      "Slots Available for Glassblowing",
+      `There are now slots available for glassblowing. Check the booking page: ${glassblowingBookingUrl}!`
+    );
+    context.log("Email sent successfully.");
   } catch (error) {
-    context.log("Error occurred when checking availability: ", error);
-  } finally {
-    await browser.close();
+    context.error("Failed to send email: ", error);
   }
 }
 
