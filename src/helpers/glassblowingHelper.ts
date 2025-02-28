@@ -57,9 +57,13 @@ export async function fetchScheduleDetails(): Promise<
 
 function buildUrl(path: string, params?: Record<string, string>): string {
   const scheduleUrl = "https://app.10to8.com/api/janus/v1/slots/";
+  const appointmentTypes = {
+    twoPeople: "1555658",
+    threePeople: "1555727",
+  };
+
   const sharedQueryParams = {
-    appointment_type:
-      "https://app.10to8.com/api/janus/v1/service-detail/1555658/",
+    appointment_type: `https://app.10to8.com/api/janus/v1/service-detail/${appointmentTypes.threePeople}/`,
     location: "https://app.10to8.com/api/janus/v1/location/744281/",
     timezone: "Europe/Stockholm",
   };
