@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@azure/functions": "^4.6.0",
+    "@azure/storage-blob": "^12.26.0",
     "dotenv": "^16.4.7",
     "nodemailer": "^6.9.16",
     "playwright": "^1.49.1"

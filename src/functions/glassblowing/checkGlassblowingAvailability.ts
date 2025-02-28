@@ -1,6 +1,10 @@
 import "dotenv/config";
 
 import { app, InvocationContext, Timer } from "@azure/functions";
+import {
+  shouldSendNewEmail,
+  updateLastEmailTimestamp,
+} from "../../email/lastEmailTimestamp";
 import { sendEmail } from "../../email/sendEmail";
 import {
   fetchScheduleDetails,
@@ -17,8 +21,6 @@ export async function checkGlassblowingAvailability(
 
   const data = await fetchScheduleDetails();
 
-  context.log("Hej: ", data);
-
   const dataExist =
     Object.keys(data?.nextAvailableDay ?? {}).length !== 0 ||
     data?.day.length !== 0 ||
@@ -28,10 +30,22 @@ export async function checkGlassblowingAvailability(
 
   if (!dataExist) {
     context.log("No slots available :(");
+    await updateLastEmailTimestamp(0, context);
     return;
   }
 
   context.log("Slots are available");
+
+  const EMAIL_DELAY_HOURS = 6;
+  const shouldSendEmail = await shouldSendNewEmail(
+    EMAIL_DELAY_HOURS * 60 * 60 * 1000,
+    context
+  );
+
+  if (!shouldSendEmail) {
+    context.log("Email was sent recently, skipping notification.");
+    return;
+  }
 
   try {
     await sendEmail(
@@ -39,6 +53,7 @@ export async function checkGlassblowingAvailability(
       `There are now slots available for glassblowing. Check the booking page: ${glassblowingBookingUrl}!`
     );
     context.log("Email sent successfully.");
+    await updateLastEmailTimestamp(Date.now(), context);
   } catch (error) {
     context.error("Failed to send email: ", error);
   }

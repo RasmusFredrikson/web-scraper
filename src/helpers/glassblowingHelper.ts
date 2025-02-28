@@ -63,7 +63,7 @@ function buildUrl(path: string, params?: Record<string, string>): string {
   };
 
   const sharedQueryParams = {
-    appointment_type: `https://app.10to8.com/api/janus/v1/service-detail/${appointmentTypes.threePeople}/`,
+    appointment_type: `https://app.10to8.com/api/janus/v1/service-detail/${appointmentTypes.twoPeople}/`,
     location: "https://app.10to8.com/api/janus/v1/location/744281/",
     timezone: "Europe/Stockholm",
   };
